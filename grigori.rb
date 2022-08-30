@@ -3,6 +3,9 @@ require "debug"
 
 require "thor"
 require "sqlite3"
+require "securerandom"
+require "shellwords"
+require "fileutils"
 
 class Grigori < Thor
   @github = Github.new
@@ -35,6 +38,84 @@ class Grigori < Thor
     end
 
     # NOTHING, we'll fail fine
+  end
+
+  desc "boot", "Boot up a vm clone, this is for testing right now"
+  def boot
+    VMManager.clone_vm
+  end
+end
+
+class VMManager
+  BASE_VM_NAME = "Ubuntu 22.04 ARM64"
+
+  def self.clone_vm
+    vm = VM.new(BASE_VM_NAME)
+    vm.start_vm
+    vm.setup_vm_environment("something-like-a-pr")
+    vm.shutdown_vm
+    vm.delete_vm
+  end
+
+  class VM
+    @vm_name = nil
+
+    def initialize(base_vm_name, new_name = nil)
+      @vm_name = new_name.nil? ? "#{base_vm_name}_#{SecureRandom.uuid}_#{DateTime.now.strftime("%Y%m%dT%H%M")}" : new_name
+      puts "Cloning new VM named #{@vm_name}"
+      `prlctl clone "#{base_vm_name}" --name "#{@vm_name}"`
+    end
+
+    def start_vm
+      puts "Starting #{@vm_name}"
+      `prlctl start "#{@vm_name}"`
+
+      # now wait until it's running (this usually is quick)
+      timeout = 0
+      while `prlctl status "#{@vm_name}"`.split(" ").last != "running" && timeout < 60
+        puts "Waiting..."
+        sleep(1)
+        timeout += 1
+      end
+    end
+
+    # To pass in variables, such as the branch name, etc, we need to get data *into* the VM.
+    # To do this we create a shared folder, and attach it to the VM. The VM will then run some scripts
+    # at the beginning to read this and do its thing.
+    def setup_vm_environment(pr_name)
+      Dir.mkdir("./.vm_setup") unless Dir.exist?("./.vm_setup")
+      vm_environment_injection_path = "./.vm_setup/#{Shellwords.escape(@vm_name)}"
+      Dir.mkdir(vm_environment_injection_path)
+
+      # Now write the stuff we want
+      File.open("#{vm_environment_injection_path}/env_injection_variables.txt", "a") do |line|
+        line.puts "HYPATIA_GIT_PR_NAME=#{pr_name}"
+      end
+
+      # And add the folder to the VM
+      `prlctl set "#{@vm_name}" --shf-host-add "env_injection_variables" --path "#{vm_environment_injection_path}"`
+    end
+
+    def shutdown_vm
+      puts "Killing #{@vm_name}"
+      `prlctl stop "#{@vm_name}" --kill` # We kill here because we delete it immediately anyways
+
+      # now wait until it's stopped
+      timeout = 0
+      while `prlctl status "#{@vm_name}"`.split(" ").last != "stopped" && timeout < 60
+        puts "Waiting..."
+        sleep(1)
+        timeout += 1
+      end
+    end
+
+    def delete_vm
+      puts "Deleting #{@vm_name}"
+      `prlctl delete "#{@vm_name}"`
+
+      # Delete the injection variables too
+      FileUtils.rm_rf "./.vm_setup/#{Shellwords.escape(@vm_name)}"
+    end
   end
 end
 
@@ -73,9 +154,9 @@ Grigori.start(ARGV)
 # Actually search for the pr we're looking for, but meh, that's last
 
 # Set up tiny localhost only web server
-# Clone clean VM
+# Clone clean VM - done
 # Set ENV variables (somehow?) with latest commit ID and PR name
-# Launch clean VM
+# Launch clean VM - done
 # Wait until VM returns
 # Send notification if failed
-# Kill the clean VM
+# Kill the clean VM - done
