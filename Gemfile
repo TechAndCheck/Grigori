@@ -9,3 +9,4 @@ gem "github_api"
 
 gem "thor"
 gem "sqlite3"
+gem "thin"
