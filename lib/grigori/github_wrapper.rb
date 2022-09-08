@@ -2,7 +2,8 @@ require "sqlite3"
 require "github_api"
 
 class GithubWrapper
-  @@github = Github.new org: "techandcheck", headers: { "Authorization" => "token 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" }
+  Dotenv.load # Not sure why I have to do this so many times, but I do
+  @@github = Github.new org: "techandcheck", headers: { "Authorization" => "token #{ENV["GITHUB_AUTH_TOKEN"]}" }
   @@db = SQLite3::Database.new "./test.db"
 
   def self.get_open_prs
