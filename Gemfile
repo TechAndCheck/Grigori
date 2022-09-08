@@ -16,3 +16,5 @@ gem "sidekiq"
 gem "slack-ruby-client"
 
 gem "rubyzip"
+gem "foreman"
+gem "debug"
