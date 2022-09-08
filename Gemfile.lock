@@ -10,9 +10,13 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
     concurrent-ruby (1.1.10)
+    connection_pool (2.2.5)
     daemons (1.4.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
+    dotenv (2.8.1)
+    ethon (0.15.0)
+      ffi (>= 1.15.0)
     eventmachine (1.2.7)
     faraday (1.10.2)
       faraday-em_http (~> 1.0)
@@ -37,6 +41,7 @@ GEM
     faraday-patron (1.0.0)
     faraday-rack (1.0.0)
     faraday-retry (1.0.3)
+    ffi (1.15.5)
     github_api (0.19.0)
       addressable (~> 2.4)
       descendants_tracker (~> 0.0.4)
@@ -64,6 +69,7 @@ GEM
     public_suffix (5.0.0)
     rack (2.2.4)
     rainbow (3.1.1)
+    redis (4.8.0)
     regexp_parser (2.5.0)
     rexml (3.2.5)
     rubocop (1.35.1)
@@ -84,6 +90,10 @@ GEM
       rubocop (>= 1.7.0, < 2.0)
     ruby-progressbar (1.11.0)
     ruby2_keywords (0.0.5)
+    sidekiq (6.5.6)
+      connection_pool (>= 2.2.5)
+      rack (~> 2.0)
+      redis (>= 4.5.0, < 5)
     sqlite3 (1.4.4)
     thin (1.8.1)
       daemons (~> 1.0, >= 1.0.9)
@@ -91,6 +101,8 @@ GEM
       rack (>= 1, < 3)
     thor (1.2.1)
     thread_safe (0.3.6)
+    typhoeus (1.4.0)
+      ethon (>= 0.9.0)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
@@ -99,12 +111,15 @@ PLATFORMS
   arm64-darwin-21
 
 DEPENDENCIES
+  dotenv
   github_api
   rubocop
   rubocop-rails
+  sidekiq
   sqlite3
   thin
   thor
+  typhoeus
 
 BUNDLED WITH
    2.3.7
