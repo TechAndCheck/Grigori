@@ -2,7 +2,7 @@ require "sqlite3"
 require "github_api"
 
 class GithubWrapper
-  @@github = Github.new
+  @@github = Github.new org: "techandcheck", headers: { "Authorization" => "token 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" }
   @@db = SQLite3::Database.new "./test.db"
 
   def self.get_open_prs
@@ -20,7 +20,7 @@ class GithubWrapper
   end
 
   def self.save_last_commit(branch, commit)
-    @@db.execute "insert into status values ( ?, ? )", branch, commit["sha"]
+    @@db.execute "update status set latest_commit = ? where branch = ? ", commit, branch
   end
 
   def self.get_last_commit(branch)

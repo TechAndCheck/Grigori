@@ -1,10 +1,12 @@
 require "thor"
 require "sqlite3"
+require "dotenv"
 
 require_relative "lib/grigori"
 
 class Grigori < Thor
   @github = Github.new
+  Dotenv.load
 
   desc "init", "Set up everything for the first use"
   def init
@@ -80,12 +82,12 @@ Grigori.start(ARGV)
 # Check the most recently PR - done
 # Get the most recently commit - done
 # If it's been committed since the last time we check, run the tests - done
-# Actually search for the pr we're looking for, but meh, that's last
+# Actually search for the pr we're looking for, but meh, that's last - done
 
 # Set up tiny localhost only web server - done
 # Clone clean VM - done
 # Set ENV variables (somehow?) with latest commit ID and PR name - done
 # Launch clean VM - done
 # Wait until VM returns - done
-# Send notification if failed
+# Send notification if failed - done
 # Kill the clean VM - done

@@ -2,3 +2,4 @@
 .vm_setup
 .env
 *.db
+injection_variables.txt

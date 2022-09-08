@@ -12,9 +12,14 @@ begin
 
   system("git clone https://www.github.com/techandcheck/hypatia.git")
   Dir.chdir "hypatia"
-  system("git checkout #{ENV["COMMIT_NAME"]}")
+
   FileUtils.cp("/media/psf/env_injection_files/injection_variables.txt", "./.env")
-  Dotenv.load # Load the variables for use later in this script
+  Dotenv.load("./.env") # Load the variables for use later in this script
+
+  puts "_____________________________________________________"
+  puts "         Checking out #{ENV["COMMIT_HASH"]}          "
+  puts "_____________________________________________________"
+  system("git checkout #{ENV["COMMIT_HASH"]}")
 
   puts "-----------------------------------------------------"
   puts "             Installing Dependencies                 "
@@ -48,12 +53,12 @@ begin
 
   system("bundle exec sidekiq -c 1 > /media/psf/env_injection_files/logs/sidekiq.log &")
 
-  # puts "-----------------------------------------------------"
-  # puts "                 Starting Tests                      "
-  # puts "-----------------------------------------------------"
+  puts "-----------------------------------------------------"
+  puts "                 Starting Tests                      "
+  puts "-----------------------------------------------------"
 
-  #test_result = system("rails test test/media_sources/twitter_media_source_test.rb > /media/psf/env_injection_files/logs/rails_test.log")
-  test_result = true
+  test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
+  # test_result = true
 
   # get test_result to determine if any tests failed
   status_code = test_result == true ? 200 : 400
