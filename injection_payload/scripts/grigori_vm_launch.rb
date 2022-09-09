@@ -57,8 +57,8 @@ begin
   puts "                 Starting Tests                      "
   puts "-----------------------------------------------------"
 
-  test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
-  # test_result = true
+  # test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
+  test_result = false
 
   # get test_result to determine if any tests failed
   status_code = test_result == true ? 200 : 400

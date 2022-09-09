@@ -28,7 +28,7 @@ These will be quite general, if you don't know how to follow one of these steps 
 
 
 TODO!!!!!
-- [] Limit number of builds at a time
+- [X] Limit number of builds at a time
 - [] Style slack messages
 - [] Listen to Slack to ask for status
 - []

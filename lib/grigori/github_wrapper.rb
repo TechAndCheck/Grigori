@@ -21,7 +21,12 @@ class GithubWrapper
   end
 
   def self.save_last_commit(branch, commit)
-    @@db.execute "update status set latest_commit = ? where branch = ? ", commit, branch
+    # Check if we have a listing for this branch yet
+    if get_last_commit(branch).nil?
+      @@db.execute "insert into status ('latest_commit', 'branch') values  ( ?, ?)", commit, branch
+    else
+      @@db.execute "update status set latest_commit = ? where branch = ? ", commit, branch
+    end
   end
 
   def self.get_last_commit(branch)
@@ -29,4 +34,3 @@ class GithubWrapper
     return last_commit.first.first unless last_commit.first.nil?
   end
 end
-
