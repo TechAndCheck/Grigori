@@ -5,12 +5,14 @@ require "dotenv"
 require_relative "lib/grigori"
 
 class Grigori < Thor
+  DATABASE_FILE = "./test.rb"
+
   @github = Github.new
   Dotenv.load
 
   desc "init", "Set up everything for the first use"
   def init
-    db = SQLite3::Database.new "./test.db"
+    db = SQLite3::Database.new DATABASE_FILE
 
     # Create a table
     db.execute <<-SQL
@@ -66,14 +68,25 @@ class Grigori < Thor
     # NOTHING, we'll fail fine
   end
 
-  desc "boot", "Boot up a vm clone, this is for testing right now"
-  def boot
-    VMManager.clone_vm
-  end
+  desc "reset", "Reset everything, shut down all running vms, etc."
+  def reset
+    # Shut down all the Vm's running
+    listing = `prlctl list`
+    captures = listing.lines.map do |line|
+      matches = line.match(/{[0-9a-z-]+} +[a-z]+ +- +(.+)/)
+      matches.captures unless matches.nil?
+    end.flatten.compact
 
-  desc "listen", "Start listening"
-  def listen
-    ListeningServer.new
+    vms = captures.map do |capture|
+      VMManager::VM.new(capture, capture, true)
+    end
+    vms.each { |vm| vm.shutdown_vm && vm.delete_vm }
+
+    # Delete the database file
+    File.delete(DATABASE_FILE) if File.exist?(DATABASE_FILE)
+
+    # Reinitialize everything
+    init
   end
 end
 
