@@ -1,11 +1,12 @@
 require "thor"
 require "sqlite3"
 require "dotenv"
+require "fileutils"
 
 require_relative "lib/grigori"
 
 class Grigori < Thor
-  DATABASE_FILE = "./test.rb"
+  DATABASE_FILE = "./test.db"
 
   @github = Github.new
   Dotenv.load
@@ -85,8 +86,41 @@ class Grigori < Thor
     # Delete the database file
     File.delete(DATABASE_FILE) if File.exist?(DATABASE_FILE)
 
+    # Delete the injection folder
+    FileUtils.remove_dir("./.vm_setup") if Dir.exist?("./.vm_setup")
+
+    # Clear the redis queue
+    `redis-cli FLUSHALL`
+
     # Reinitialize everything
     init
+  end
+
+  desc "force BRANCH TEST_FILE", "Run a specific [BRANCH], with the specific [TEST_FILE]"
+  def force(branch, test_file = nil)
+    # Check if there's a git branch
+    branch_object = GithubWrapper.get_branch(branch)
+    raise "Branch not found" if branch_object.nil?
+    # Check if the test file exists
+    # raise "File not found" unless test_file.nil? || File.exist?(test_file)
+    # Adjust the launch script to put the branch and test file Reinitialize
+    VMManager.clone_vm(nil, branch_object["commit"]["sha"], branch: branch, test_file: test_file)
+    # Start a listener if we don't have one running
+    ListeningServer.new
+    # Launch
+  end
+
+  desc "server BRANCH", "Run the rails code of a specific [BRANCH]"
+  def server(branch = "master")
+    branch_object = GithubWrapper.get_branch(branch)
+    raise "Branch not found" if branch_object.nil?
+
+    VMManager.clone_vm(nil, branch_object["commit"]["sha"], branch: branch, run_server: true)
+  end
+
+  desc "slack", "Run Slack as testing"
+  def slack
+    SlackManager.instance # kick it off
   end
 end
 

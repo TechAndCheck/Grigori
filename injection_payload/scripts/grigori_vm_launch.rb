@@ -53,12 +53,32 @@ begin
 
   system("bundle exec sidekiq -c 1 > /media/psf/env_injection_files/logs/sidekiq.log &")
 
+  if ENV["RUN_ONLY"].nil? == false
+    puts "-----------------------------------------------------"
+    puts "                 Starting Server                     "
+    puts "-----------------------------------------------------"
+
+    auth_code = `rails r "puts Setting.generate_auth_key"`.split.last
+    puts "******"
+    puts "URL: http://grigori-reporterslab.pagekite.me"
+    puts "Auth Code: #{auth_code}"
+    puts "******"
+
+    system("rails s > /media/psf/env_injection_files/logs/rails_server.log &")
+    system("python3 ~/pagekite.py")
+    return
+  end
+
   puts "-----------------------------------------------------"
   puts "                 Starting Tests                      "
   puts "-----------------------------------------------------"
 
-  # test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
-  test_result = false
+  if ENV["TEST_FILE"].nil?
+    test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
+  else
+    test_result = system("rails test #{ENV["TEST_FILE"]} > /media/psf/env_injection_files/logs/rails_test.log")
+  end
+  # test_result = true
 
   # get test_result to determine if any tests failed
   status_code = test_result == true ? 200 : 400
@@ -70,7 +90,7 @@ begin
   body: { vm_id: ENV["VM_NAME"], status_code: status_code, status_message: status_message }.to_json)
 rescue StandardError => e
   # Send this back to the main manager
-  status_message = "Error running tests: #{e}"
+  status_message = "Error running tests: #{e.inspect}"
 
   Typhoeus.post("http://10.211.55.2:2345/tests_completed",
   headers: { "Content-Type": "application/json" },

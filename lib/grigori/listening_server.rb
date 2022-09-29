@@ -84,7 +84,7 @@ class ListeningServer
     end
 
     def send_success_to_slack(vm_id)
-      @@slack_client.chat_postMessage(
+      SlackManager.send_message(
         channel: ENV["SLACK_NOTIFICATION_ROOM_ID"],
         text: "#{vm_id}: Completed VM run successfully",
         blocks: [
@@ -136,7 +136,7 @@ class ListeningServer
     end
 
     def send_failure_to_slack(vm_id, test_status_message)
-      @@slack_client.chat_postMessage(
+      SlackManager.send_message(
         channel: ENV["SLACK_NOTIFICATION_ROOM_ID"],
         text: "#{vm_id}: Internal Error in VM : #{test_status_message}",
         blocks: [

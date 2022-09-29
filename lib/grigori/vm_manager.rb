@@ -8,13 +8,11 @@ class VMManager
   @@db = SQLite3::Database.new "./test.db"
   @@current_vms = []
 
-  def self.clone_vm(pr_name, commit_hash)
+  def self.clone_vm(pr_name, commit_hash, branch: nil, test_file: nil, run_server: false)
     vm = VM.new(BASE_VM_NAME)
     @@current_vms << vm
-    vm.setup_vm_environment(pr_name, commit_hash)
+    vm.setup_vm_environment(pr_name, commit_hash, branch: branch, test_file: test_file, run_server: run_server)
     vm.start_vm
-    # vm.shutdown_vm
-    # vm.delete_vm
   end
 
   def self.vm_exist?(vm_id)
@@ -65,7 +63,7 @@ class VMManager
     # To pass in variables, such as the branch name, etc, we need to get data *into* the VM.
     # To do this we create a shared folder, and attach it to the VM. The VM will then run some scripts
     # at the beginning to read this and do its thing.
-    def setup_vm_environment(pr, commit_hash)
+    def setup_vm_environment(pr, commit_hash, branch: nil, test_file: nil, run_server: false)
       Dir.mkdir("./.vm_setup") unless Dir.exist?("./.vm_setup")
       vm_environment_injection_path = "./.vm_setup/#{Shellwords.escape(@vm_name)}"
       Dir.mkdir(vm_environment_injection_path)
@@ -74,9 +72,17 @@ class VMManager
       # Add the vm name to the variables files
       File.open(File.join(vm_environment_injection_path, "injection_variables.txt"), "a") do |file|
         file.puts "VM_NAME=\"#{@vm_name}\""
-        file.puts "PR_NAME=\"#{pr["title"]}\""
-        file.puts "BRANCH_NAME=\"#{pr["head"]["ref"]}"
+        if branch.nil?
+          file.puts "PR_NAME=\"#{pr["title"]}\""
+          file.puts "BRANCH_NAME=\"#{pr["head"]["ref"]}\""
+        else
+          file.puts "PR_NAME=\"NA\""
+          file.puts "BRANCH_NAME=\"#{branch}\""
+        end
         file.puts "COMMIT_HASH=\"#{commit_hash}\""
+
+        file.puts "TEST_FILE=\"#{test_file}\"" unless test_file.nil?
+        file.puts "RUN_ONLY=true" if run_server == true
       end
 
       # And add the folder to the VM

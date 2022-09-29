@@ -15,6 +15,13 @@ class GithubWrapper
     pr["head"]["ref"]
   end
 
+  def self.get_branch(branch_name)
+    branches = @@github.repos.branches("techandcheck", "hypatia").all("techandcheck", "hypatia")
+    branch = branches.select { |branch| branch["name"].downcase == branch_name.downcase }
+    return branch.first if branch.count.positive?
+    nil
+  end
+
   def self.get_latest_commit_for_branch(branch_name)
     branch = @@github.repos.branches.get "techandcheck", "hypatia", branch_name
     branch["commit"]
