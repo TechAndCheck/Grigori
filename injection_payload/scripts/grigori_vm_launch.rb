@@ -45,7 +45,9 @@ begin
   Dir.mkdir("/media/psf/env_injection_files/logs")
   puts "Downloading Selenium..."
   system("wget -P /media/psf/env_injection_files/ https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.5.0/selenium-server-4.5.0.jar")
-  system("java -jar /media/psf/env_injection_files/selenium-server-4.5.0.jar standalone --session-timeout 10000 > /media/psf/env_injection_files/logs/selenium-server.log &")
+  system("java -jar /media/psf/env_injection_files/selenium-server-4.5.0.jar hub > /media/psf/env_injection_files/logs/selenium-hub.log &")
+  system("java -jar /media/psf/env_injection_files/selenium-server-4.5.0.jar node --port 5555 --session-timeout 10000 --drain-after-session-count 0 > /media/psf/env_injection_files/logs/selenium-node_1.log &")
+  system("java -jar /media/psf/env_injection_files/selenium-server-4.5.0.jar node --port 5556 --session-timeout 10000 --drain-after-session-count 0 > /media/psf/env_injection_files/logs/selenium-node_2.log &")
 
   puts "-----------------------------------------------------"
   puts "                 Start Sidekiq                       "
