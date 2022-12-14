@@ -13,7 +13,7 @@ gem "thin"
 gem "typhoeus"
 gem "dotenv"
 gem "sidekiq"
-gem "slack-ruby-client"
+gem "slack-ruby-client", '~> 2.0.0'
 
 gem "rubyzip"
 gem "foreman"
