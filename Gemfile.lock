@@ -26,48 +26,24 @@ GEM
     debug (1.6.2)
       irb (>= 1.3.6)
       reline (>= 0.3.1)
-    descendants_tracker (0.0.4)
-      thread_safe (~> 0.3, >= 0.3.1)
     dotenv (2.8.1)
     ethon (0.15.0)
       ffi (>= 1.15.0)
     eventmachine (1.2.7)
-    faraday (1.10.2)
-      faraday-em_http (~> 1.0)
-      faraday-em_synchrony (~> 1.0)
-      faraday-excon (~> 1.1)
-      faraday-httpclient (~> 1.0)
-      faraday-multipart (~> 1.0)
-      faraday-net_http (~> 1.0)
-      faraday-net_http_persistent (~> 1.0)
-      faraday-patron (~> 1.0)
-      faraday-rack (~> 1.0)
-      faraday-retry (~> 1.0)
+    faraday (2.7.2)
+      faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
-    faraday-em_http (1.0.0)
-    faraday-em_synchrony (1.0.0)
-    faraday-excon (1.1.0)
-    faraday-httpclient (1.0.1)
+    faraday-mashify (0.1.1)
+      faraday (~> 2.0)
+      hashie
     faraday-multipart (1.0.4)
       multipart-post (~> 2)
-    faraday-net_http (1.0.1)
-    faraday-net_http_persistent (1.2.0)
-    faraday-patron (1.0.0)
-    faraday-rack (1.0.0)
-    faraday-retry (1.0.3)
-    faraday_middleware (1.2.0)
-      faraday (~> 1.0)
+    faraday-net_http (3.0.2)
     ffi (1.15.5)
     fiber-local (1.0.0)
     foreman (0.87.2)
-    github_api (0.19.0)
-      addressable (~> 2.4)
-      descendants_tracker (~> 0.0.4)
-      faraday (>= 0.8, < 2)
-      hashie (~> 3.5, >= 3.5.2)
-      oauth2 (~> 1.0)
     gli (2.21.0)
-    hashie (3.6.0)
+    hashie (5.0.0)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     io-console (0.5.11)
@@ -75,21 +51,15 @@ GEM
     irb (1.4.1)
       reline (>= 0.3.0)
     json (2.6.2)
-    jwt (2.5.0)
     minitest (5.16.3)
-    multi_json (1.15.0)
-    multi_xml (0.6.0)
     multipart-post (2.2.3)
-    oauth2 (1.4.10)
-      faraday (>= 0.17.3, < 3.0)
-      jwt (>= 1.0, < 3.0)
-      multi_json (~> 1.3)
-      multi_xml (~> 0.5)
-      rack (>= 1.2, < 3)
+    octokit (6.0.1)
+      faraday (>= 1, < 3)
+      sawyer (~> 0.9)
     parallel (1.22.1)
     parser (3.1.2.1)
       ast (~> 2.4.1)
-    public_suffix (5.0.0)
+    public_suffix (5.0.1)
     rack (2.2.4)
     rainbow (3.1.1)
     redis (4.8.0)
@@ -116,13 +86,17 @@ GEM
     ruby-progressbar (1.11.0)
     ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
+    sawyer (0.9.2)
+      addressable (>= 2.3.5)
+      faraday (>= 0.17.3, < 3)
     sidekiq (6.5.6)
       connection_pool (>= 2.2.5)
       rack (~> 2.0)
       redis (>= 4.5.0, < 5)
-    slack-ruby-client (1.0.0)
-      faraday (>= 1.0)
-      faraday_middleware
+    slack-ruby-client (2.0.0)
+      faraday (>= 2.0)
+      faraday-mashify
+      faraday-multipart
       gli
       hashie
       websocket-driver
@@ -132,7 +106,6 @@ GEM
       eventmachine (~> 1.0, >= 1.0.4)
       rack (>= 1, < 3)
     thor (1.2.1)
-    thread_safe (0.3.6)
     timers (4.3.4)
     typhoeus (1.4.0)
       ethon (>= 0.9.0)
@@ -152,12 +125,12 @@ DEPENDENCIES
   debug
   dotenv
   foreman
-  github_api
+  octokit
   rubocop
   rubocop-rails
   rubyzip
   sidekiq
-  slack-ruby-client
+  slack-ruby-client (~> 2.0.0)
   sqlite3
   thin
   thor

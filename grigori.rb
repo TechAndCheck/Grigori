@@ -8,7 +8,6 @@ require_relative "lib/grigori"
 class Grigori < Thor
   DATABASE_FILE = "./test.db"
 
-  @github = Github.new
   Dotenv.load
 
   desc "init", "Set up everything for the first use"
@@ -48,7 +47,7 @@ class Grigori < Thor
 
     # Search for PR
     index = prs.index do |found_pr|
-      found_pr["number"] == pr
+      found_pr.number == pr
     end
 
     raise "PR not found" if index.nil?

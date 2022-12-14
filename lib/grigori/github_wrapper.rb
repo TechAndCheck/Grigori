@@ -1,30 +1,26 @@
 require "sqlite3"
-require "github_api"
+require "octokit"
 
 class GithubWrapper
   Dotenv.load # Not sure why I have to do this so many times, but I do
-  @@github = Github.new org: "techandcheck", headers: { "Authorization" => "token #{ENV["GITHUB_AUTH_TOKEN"]}" }
+  @@github = Octokit::Client.new(access_token: "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")
   @@db = SQLite3::Database.new "./test.db"
 
   def self.get_open_prs
-    prs = @@github.pull_requests.list("techandcheck", "hypatia").body
-    prs.select { |pr| pr["state"] == "open" && pr["draft"] == false }
+    prs = @@github.pull_requests("TechAndCheck/hypatia")
+    prs.select { |pr| pr.state == "open" && pr.draft == false }
   end
 
   def self.get_branch_for_pr(pr)
-    pr["head"]["ref"]
+    pr.head.ref
   end
 
   def self.get_branch(branch_name)
-    branches = @@github.repos.branches("techandcheck", "hypatia").all("techandcheck", "hypatia")
-    branch = branches.select { |branch| branch["name"].downcase == branch_name.downcase }
-    return branch.first if branch.count.positive?
-    nil
+    @@github.branch("TechAndCheck/hypatia", branch_name)
   end
 
   def self.get_latest_commit_for_branch(branch_name)
-    branch = @@github.repos.branches.get "techandcheck", "hypatia", branch_name
-    branch["commit"]
+    self.get_branch(branch_name).commit
   end
 
   def self.save_last_commit(branch, commit)
