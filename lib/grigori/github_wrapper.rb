@@ -3,7 +3,7 @@ require "octokit"
 
 class GithubWrapper
   Dotenv.load # Not sure why I have to do this so many times, but I do
-  @@github = Octokit::Client.new(access_token: "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")
+  @@github = Octokit::Client.new(access_token: ENV["GITHUB_AUTH_TOKEN"])
   @@db = SQLite3::Database.new "./test.db"
 
   def self.get_open_prs
