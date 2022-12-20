@@ -9,6 +9,7 @@ class ListeningServer
   def initialize
     Thin::Server.start("0.0.0.0", 2345) do
       use Rack::CommonLogger
+      use Rack::ShowExceptions
       map "/tests_completed" do
         run SimpleAdapter.new
       end
@@ -70,13 +71,17 @@ class ListeningServer
       test_status_code = message["status_code"]
       test_status_message = message["status_message"]
 
-      case test_status_code
-      when 200
-        send_success_to_slack(message["vm_id"])
-      when 400, 500
-        send_failure_to_slack(message["vm_id"], test_status_message)
-      else
-        send_failure_to_slack(message["vm_id"], test_status_message)
+      begin
+        case test_status_code
+        when 200
+          send_success_to_slack(message["vm_id"])
+        when 400, 500
+          send_failure_to_slack(message["vm_id"], test_status_message)
+        else
+          send_failure_to_slack(message["vm_id"], test_status_message)
+        end
+      rescue StandardError => e
+        puts "Error submitting to Slack: #{e.inspect}"
       end
 
       vm.shutdown_vm
@@ -195,12 +200,7 @@ class ListeningServer
 
       output_log_file = prepare_logs_for_slack(vm_id)
 
-      # Upload it
-      @@slack_client.files_upload(
-        channels: ENV["SLACK_NOTIFICATION_ROOM_ID"],
-        as_user: true,
-        file: Faraday::UploadIO.new(output_log_file, "application/zip")
-      )
+      SlackManager.send_file(output_log_file, "Logs for #{vm_id}")
     end
 
     def prepare_logs_for_slack(vm_id)

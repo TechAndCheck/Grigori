@@ -75,12 +75,12 @@ begin
   puts "                 Starting Tests                      "
   puts "-----------------------------------------------------"
 
-  # if ENV["TEST_FILE"].nil?
-  #   test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
-  # else
-  #   test_result = system("rails test #{ENV["TEST_FILE"]} > /media/psf/env_injection_files/logs/rails_test.log")
-  # end
-  test_result = true
+  if ENV["TEST_FILE"].nil?
+    test_result = system("rails test > /media/psf/env_injection_files/logs/rails_test.log")
+  else
+    test_result = system("rails test #{ENV["TEST_FILE"]} > /media/psf/env_injection_files/logs/rails_test.log")
+  end
+  # test_result = false
 
   # get test_result to determine if any tests failed
   status_code = test_result == true ? 200 : 400

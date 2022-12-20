@@ -1,3 +1,10 @@
+PATH
+  remote: ../layabout_socket
+  specs:
+    layabout_socket (0.1.0)
+      faye-websocket
+      typhoeus
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -39,6 +46,9 @@ GEM
     faraday-multipart (1.0.4)
       multipart-post (~> 2)
     faraday-net_http (3.0.2)
+    faye-websocket (0.11.1)
+      eventmachine (>= 0.12.0)
+      websocket-driver (>= 0.5.1)
     ffi (1.15.5)
     fiber-local (1.0.0)
     foreman (0.87.2)
@@ -125,6 +135,7 @@ DEPENDENCIES
   debug
   dotenv
   foreman
+  layabout_socket!
   octokit
   rubocop
   rubocop-rails
