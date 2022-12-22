@@ -23,6 +23,10 @@ class GithubWrapper
     self.get_branch(branch_name).commit
   end
 
+  def self.get_user_for_commit(commit_hash)
+    @@github.commit("TechAndCheck/hypatia", commit_hash).commit.author
+  end
+
   def self.save_last_commit(branch, commit)
     # Check if we have a listing for this branch yet
     if get_last_commit(branch).nil?

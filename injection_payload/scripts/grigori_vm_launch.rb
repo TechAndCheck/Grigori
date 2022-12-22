@@ -80,7 +80,7 @@ begin
   else
     test_result = system("rails test #{ENV["TEST_FILE"]} > /media/psf/env_injection_files/logs/rails_test.log")
   end
-  # test_result = false
+  # test_result = true
 
   # get test_result to determine if any tests failed
   status_code = test_result == true ? 200 : 400

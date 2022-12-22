@@ -25,7 +25,9 @@ class Grigori < Thor
     db.execute <<-SQL
       create table vms (
         id varchar(30),
-        current_status varchar(30)
+        current_status varchar(30),
+        branch varchar(30),
+        commit_hash varchar(30)
       );
     SQL
   rescue SQLite3::SQLException
@@ -78,7 +80,7 @@ class Grigori < Thor
     end.flatten.compact
 
     vms = captures.map do |capture|
-      VMManager::VM.new(capture, capture, true)
+      VMManager::VM.new(nil, capture, new_name: capture, restore: true)
     end
     vms.each { |vm| vm.shutdown_vm && vm.delete_vm }
 

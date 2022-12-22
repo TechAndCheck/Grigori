@@ -5,6 +5,7 @@ require "typhoeus"
 require "slack"
 require "zip"
 require "dotenv"
+
 class ListeningServer
   def initialize
     Thin::Server.start("0.0.0.0", 2345) do
@@ -89,6 +90,10 @@ class ListeningServer
     end
 
     def send_success_to_slack(vm_id)
+      vm = VMManager.vm_for_id(vm_id)
+      commiter = GithubWrapper.get_user_for_commit(vm.commit_hash)
+      slack_user = SlackManager.user_for_email_address(commiter.email)
+
       SlackManager.send_message(
         channel: ENV["SLACK_NOTIFICATION_ROOM_ID"],
         text: "#{vm_id}: Completed VM run successfully",
@@ -104,22 +109,42 @@ class ListeningServer
             type: "section",
             text: {
               type: "mrkdwn",
-              text: "@cguess: all your tests have completed successfully! Good job! 🤘"
+              text: "#{slack_user.nil? ? nil : "@#{slack_user}: "}Your tests have completed successfully! Good job! 🤘"
+            }
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "*Date/Time*\n#{Time.now.utc.strftime("%Y-%m-%d %k:%M:%S %Z")}  |  #{Time.now.strftime("%Y-%m-%d %k:%M:%S %Z")}"
             }
           },
           {
             type: "divider"
+          },
+                   {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: "*Branch Name*\n`#{vm.branch}`"
+              },
+              {
+                type: "mrkdwn",
+                text: "*Commit SHA*\n`#{vm.commit_hash}`"
+              }
+            ]
           },
           {
             type: "section",
             fields: [
               {
                 type: "mrkdwn",
-                text: "*Branch Name*\n`this-is-a-test-branch`"
+                text: "*Committer Name*\n`#{commiter.name}`"
               },
               {
                 type: "mrkdwn",
-                text: "*Commit SHA*\n`skdfjldksfjsdlkfjlskfjdsklfjdsklfjsklfj`"
+                text: "*Committer Email*\n`#{commiter.email}`"
               }
             ]
           },
@@ -141,6 +166,10 @@ class ListeningServer
     end
 
     def send_failure_to_slack(vm_id, test_status_message)
+      vm = VMManager.vm_for_id(vm_id)
+      commiter = GithubWrapper.get_user_for_commit(vm.commit_hash)
+      slack_user = SlackManager.user_for_email_address(commiter.email)
+
       SlackManager.send_message(
         channel: ENV["SLACK_NOTIFICATION_ROOM_ID"],
         text: "#{vm_id}: Internal Error in VM : #{test_status_message}",
@@ -156,7 +185,14 @@ class ListeningServer
             type: "section",
             text: {
               type: "mrkdwn",
-              text: "@cguess: Your test run failed, sorry about that 🐸"
+              text: "#{slack_user.nil? ? "A" : "@#{slack_user}: Your"} test run failed, sorry about that 🐸"
+            }
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "*Date/Time*\n#{Time.now.utc.strftime("%Y-%m-%d %k:%M:%S %Z")}  |  #{Time.now.strftime("%Y-%m-%d %k:%M:%S %Z")}"
             }
           },
           {
@@ -174,11 +210,24 @@ class ListeningServer
             fields: [
               {
                 type: "mrkdwn",
-                text: "*Branch Name*\n`this-is-a-test-branch`"
+                text: "*Branch Name*\n`#{vm.branch}`"
               },
               {
                 type: "mrkdwn",
-                text: "*Commit SHA*\n`skdfjldksfjsdlkfjlskfjdsklfjdsklfjsklfj`"
+                text: "*Commit SHA*\n`#{vm.commit_hash}`"
+              }
+            ]
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: "*Committer Name*\n`#{commiter.name}`"
+              },
+              {
+                type: "mrkdwn",
+                text: "*Committer Email*\n`#{commiter.email}`"
               }
             ]
           },

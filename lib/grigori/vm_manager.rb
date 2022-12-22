@@ -9,7 +9,7 @@ class VMManager
   @@current_vms = []
 
   def self.clone_vm(pr_name, commit_hash, branch: nil, test_file: nil, run_server: false)
-    vm = VM.new(BASE_VM_NAME)
+    vm = VM.new(BASE_VM_NAME, commit_hash, branch: branch)
     @@current_vms << vm
     vm.setup_vm_environment(pr_name, commit_hash, branch: branch, test_file: test_file, run_server: run_server)
     vm.start_vm
@@ -21,31 +21,38 @@ class VMManager
 
   def self.vm_for_id(vm_id)
     return nil unless self.vm_exist?(vm_id)
-    VM.new(vm_id, vm_id, true)
+
+    vm_sql = @@db.execute("select * from vms where id = ?", vm_id).first
+    vm = VM.new(nil, vm_sql[3], branch: vm_sql[2], new_name: vm_sql[0], restore: true)
+    vm
   end
 
   class VM
     @vm_name = nil
+    @branch = nil
+    @commit_hash = nil
     @db = nil
 
     attr_reader :vm_name
+    attr_reader :commit_hash
+    attr_reader :branch
 
-    def initialize(base_vm_name, new_name = nil, restore = false)
+    def initialize(base_vm_name, commit_hash, branch: nil, new_name: nil, restore: false)
       @db = SQLite3::Database.new "./test.db"
 
       @vm_name = new_name.nil? ? "#{base_vm_name}_#{SecureRandom.uuid}_#{DateTime.now.strftime("%Y%m%dT%H%M")}" : new_name
+      @branch = branch
+      @commit_hash = commit_hash
+
       return if restore == true # We bail out here since it already exists
 
       puts "Cloning new VM named #{@vm_name}"
       `prlctl clone "#{BASE_VM_NAME}" --name "#{@vm_name}"`
 
-      @db.execute "insert into vms values ( ?, 'pending' )", @vm_name
-    rescue StandardError => e
-      debugger
+      @db.execute "insert into vms values ( ?, 'pending', ?, ?)", @vm_name, branch, commit_hash
     end
 
     def start_vm
-      # puts "Starting #{@vm_name}"
       `prlctl start "#{@vm_name}"`
       update_vm_status("starting")
 

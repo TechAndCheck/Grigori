@@ -54,4 +54,17 @@ class SlackManager
         initial_comment: initial_comment,
         channels: ENV["SLACK_NOTIFICATION_ROOM_ID"] })
   end
+
+  def self.user_for_email_address(email_address)
+    email_address = email_address.downcase
+    request = Typhoeus.get("https://slack.com/api/users.list",
+      headers: { "Authorization": "Bearer #{ ENV["SLACK_API_TOKEN"] }" })
+    response = JSON.parse(request.response_body)
+    index = response["members"].find_index do |member|
+      member["profile"]["email"].downcase == email_address unless member["profile"]["email"].nil?
+    end
+
+    return if index.nil?
+    response["members"][index]["profile"]
+  end
 end
