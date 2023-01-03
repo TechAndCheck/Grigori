@@ -109,7 +109,7 @@ class ListeningServer
             type: "section",
             text: {
               type: "mrkdwn",
-              text: "#{slack_user.nil? ? nil : "@#{slack_user}: "}Your tests have completed successfully! Good job! 🤘"
+              text: "#{slack_user.nil? ? nil : "@#{slack_user["name"]}: "}Your tests have completed successfully! Good job! 🤘"
             }
           },
           {
@@ -185,7 +185,7 @@ class ListeningServer
             type: "section",
             text: {
               type: "mrkdwn",
-              text: "#{slack_user.nil? ? "A" : "@#{slack_user}: Your"} test run failed, sorry about that 🐸"
+              text: "#{slack_user.nil? ? "A" : "@#{slack_user["name"]}: Your"} test run failed, sorry about that 🐸"
             }
           },
           {

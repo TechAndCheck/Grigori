@@ -65,6 +65,6 @@ class SlackManager
     end
 
     return if index.nil?
-    response["members"][index]["profile"]
+    response["members"][index]
   end
 end
